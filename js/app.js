@@ -12,9 +12,10 @@ const SUL_SUDESTE = ["MG", "SP", "RJ", "PR", "RS", "SC"];
 const NORTE_NE_CO_ES = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "PA", "PB", "PE", "PI", "RN", "RO", "RR", "SE", "TO"];
 
 // Estado geral da aplicação
-let cfAtivo = false;   // controla se o custo fixo está ligado
-let historico = [];    // armazena simulações salvas
-let regime = "sn";     // regime inicial: sn = Simples Nacional
+let cfAtivo = false;          // controla se o custo fixo está ligado
+let historico = [];           // armazena simulações salvas
+let regime = "sn";            // regime inicial: sn = Simples Nacional
+let produtoImportado = false; // produto importado do exterior — ICMS interestadual 4% (Res. Senado 13/2012)
 
 // ===== FORMATAÇÃO =====
 // Formatador de moeda em padrão BRL
@@ -64,7 +65,8 @@ function getParams() {
   const orig = document.getElementById("uf-origem").value;
   const dest = document.getElementById("uf-destino").value;
 
-  const ai = getInterestadual(orig, dest);
+  const aiBase = getInterestadual(orig, dest);
+  const ai = (aiBase > 0 && produtoImportado) ? 0.04 : aiBase;
   const ap = ALIQ_INTERNA[dest] || 0.20;
 
   const maqTaxa = parseFloat(document.getElementById("maq-taxa").value) / 100 || 0;
@@ -82,6 +84,7 @@ function getParams() {
     maqTaxa,
     maqNome,
     cf,
+    importado: produtoImportado,
     custo: Math.max(0, parseFloat(document.getElementById("custo").value) || 0),
     venda: Math.max(0, parseFloat(document.getElementById("venda").value) || 0)
   };
@@ -205,6 +208,13 @@ function onMaqChange() {
   recalc();
 }
 
+// Liga/desliga modo de produto de importação — ICMS interestadual 4% (Res. Senado 13/2012)
+function toggleImportacao() {
+  produtoImportado = !produtoImportado;
+  document.getElementById("tog-imp").classList.toggle("on", produtoImportado);
+  recalc();
+}
+
 // Liga/desliga custo fixo
 function toggleCF() {
   cfAtivo = !cfAtivo;
@@ -233,9 +243,11 @@ function recalc() {
   document.getElementById("b-custo").textContent = fmt(p.custo);
 
   document.getElementById("b-difal").textContent = fmt(r.d);
+  const importNote = (produtoImportado && p.ai > 0) ? " · importação — 4% (Res. 13/2012)" : "";
   document.getElementById("sub-difal").textContent = p.ai > 0
-    ? "BC = " + fmt(r.bc) + " · " + fmt(r.d) + " (" + fmtP(p.custo > 0 ? r.d / p.custo : 0) + " s/custo)"
+    ? "BC = " + fmt(r.bc) + " · " + fmt(r.d) + " (" + fmtP(p.custo > 0 ? r.d / p.custo : 0) + " s/custo)" + importNote
     : "Mesmo estado — sem DIFAL";
+  document.getElementById("imp-badge").style.display = (produtoImportado && p.ai > 0) ? "inline" : "none";
 
   // Valores específicos por regime
   if (regime === "sn") {
@@ -535,7 +547,7 @@ function renderHist() {
   el.innerHTML = historico.map((h, i) => `
     <div class="hist-item" onclick="carregarSim(${i})">
       <div class="hist-top">
-        <span class="hist-title">${h.orig}→${h.dest} · Custo ${fmt(h.custo)} · Venda ${fmt(h.venda)} · ${h.regime === "sn" ? "Simples" : "Lucro Pres."}</span>
+        <span class="hist-title">${h.orig}→${h.dest} · Custo ${fmt(h.custo)} · Venda ${fmt(h.venda)} · ${h.regime === "sn" ? "Simples" : "Lucro Pres."}${h.importado ? " · Importação" : ""}</span>
         <span class="hist-time">${h.data || ""} ${h.hora}</span>
       </div>
       <div class="hist-vals">
@@ -561,13 +573,39 @@ function carregarSim(i) {
     document.getElementById("simples").value = (h.simPct * 100).toFixed(2);
   }
 
+  if (h.regime === "lp") {
+    if (h.pisCofins !== undefined) document.getElementById("lp-piscofins").value = (h.pisCofins * 100).toFixed(2);
+    if (h.irpj !== undefined) document.getElementById("lp-irpj").value = (h.irpj * 100).toFixed(2);
+    if (h.csll !== undefined) document.getElementById("lp-csll").value = (h.csll * 100).toFixed(2);
+  }
+
+  if (h.maqTaxa !== undefined) {
+    const maqTaxaPct = (h.maqTaxa * 100).toFixed(2);
+    document.getElementById("maq-taxa").value = maqTaxaPct;
+    const sel = document.getElementById("maq-sel");
+    let matched = false;
+    for (const opt of sel.options) {
+      if (opt.value !== "custom" && Math.abs(parseFloat(opt.value) - parseFloat(maqTaxaPct)) < 0.001) {
+        sel.value = opt.value;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) sel.value = "custom";
+  }
+
   if (h.cf > 0 && !cfAtivo) {
+    toggleCF();
+  } else if (!h.cf && cfAtivo) {
     toggleCF();
   }
 
   if (h.cf > 0) {
     document.getElementById("custo-fixo").value = h.cf;
   }
+
+  produtoImportado = h.importado || false;
+  document.getElementById("tog-imp").classList.toggle("on", produtoImportado);
 
   recalc();
 
@@ -587,8 +625,9 @@ function toggleGlossario(el) {
 // Aciona a impressão/salvamento em PDF
 function salvarPDF() {
   const tituloOriginal = document.title;
+  const dataPDF = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "-");
 
-  document.title = "Simulador_Precificacao_Exito_Contabil";
+  document.title = "Simulador_Precificacao_Exito_Contabil_" + dataPDF;
   window.print();
 
   setTimeout(function () {

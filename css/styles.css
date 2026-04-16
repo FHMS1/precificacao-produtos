@@ -114,6 +114,11 @@ header::after{
 .ba{background:var(--warning-bg);color:var(--warning)}
 .br{background:var(--danger-bg);color:var(--danger)}
 .bi{background:var(--info-bg);color:var(--info)}
+.imp-badge{
+  display:none;background:var(--warning);color:#fff;
+  border-radius:10px;padding:2px 9px;
+  font-size:10.5px;font-weight:700;margin-left:6px;white-space:nowrap;
+}
 
 /* ===== ALERTAS ===== */
 .alert-box{

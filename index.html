@@ -144,8 +144,20 @@
         </div>
       </div>
 
+      <div class="itoggle" style="margin:4px 0 12px">
+        <label>
+          Produto de importação — ICMS 4%
+          <span class="tooltip-wrap">
+            <span class="tooltip-icon">?</span>
+            <span class="tooltip-box">Res. do Senado nº 13/2012: em operações interestaduais com mercadorias importadas do exterior, o ICMS interestadual é de 4%, independente da UF de origem e destino. Isso altera o cálculo do DIFAL.</span>
+          </span>
+        </label>
+        <div class="tog" id="tog-imp" onclick="toggleImportacao()"></div>
+      </div>
+
       <div class="difal-tag" id="difal-tag">
         DIFAL: <span id="tag-inter">—</span> interestadual &nbsp;·&nbsp; <span id="tag-interna">—</span> interna &nbsp;·&nbsp; <strong id="tag-dif">—</strong> diferença
+        <span id="imp-badge" class="imp-badge">Importação</span>
       </div>
     </div>
 
@@ -536,8 +548,13 @@
       </div>
 
       <div class="glossario-item" onclick="toggleGlossario(this)">
-        <div class="glossario-lbl">DIFAL — Diferencial de Alíquota de ICMS</div>
-        <div class="glossario-sub">Imposto cobrado quando a empresa compra mercadoria de outro estado. É a diferença entre a alíquota interna do estado destino e a alíquota interestadual, calculado “por dentro” conforme SEFAZ/PB.</div>
+        <div class=”glossario-lbl”>DIFAL — Diferencial de Alíquota de ICMS</div>
+        <div class=”glossario-sub”>Imposto cobrado quando a empresa compra mercadoria de outro estado. É a diferença entre a alíquota interna do estado destino e a alíquota interestadual, calculado “por dentro” conforme SEFAZ/PB.</div>
+      </div>
+
+      <div class="glossario-item" onclick="toggleGlossario(this)">
+        <div class=”glossario-lbl”>Produto de importação e DIFAL</div>
+        <div class=”glossario-sub”>Pela Resolução do Senado Federal nº 13/2012, em operações interestaduais com mercadorias importadas do exterior, o ICMS interestadual é de 4% — independente dos estados envolvidos. Isso eleva o diferencial de alíquota a recolher na maioria dos estados, pois a diferença entre 4% e a alíquota interna do destino é maior do que nas operações normais (7% ou 12%).</div>
       </div>
 
       <div class="glossario-item" onclick="toggleGlossario(this)">
