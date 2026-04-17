@@ -635,8 +635,37 @@ function salvarPDF() {
   }, 1000);
 }
 
+// ===== TEMA CLARO / ESCURO =====
+const LOGO_BRANCO = "./exito-logo-branco.png";
+const LOGO_AZUL   = "./exito-logo-azul.png";
+
+// SVG lua (modo claro ativo — clique para escurecer)
+const ICON_LUA = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+// SVG sol (modo escuro ativo — clique para clarear)
+const ICON_SOL = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+
+function _aplicarTema(dark) {
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  document.getElementById("logo-img").src = LOGO_BRANCO; // header sempre teal, logo sempre branca
+  document.getElementById("theme-icon").innerHTML = dark ? ICON_SOL : ICON_LUA;
+  try { localStorage.setItem("precificador_tema", dark ? "dark" : "light"); } catch (e) {}
+}
+
+function toggleTheme() {
+  _aplicarTema(document.documentElement.dataset.theme !== "dark");
+}
+
 // ===== INICIALIZAÇÃO =====
-// Ao carregar a página, restaura histórico e calcula a tela inicial
+// Restaura tema salvo
+(function () {
+  try {
+    const t = localStorage.getItem("precificador_tema");
+    _aplicarTema(t === "dark");
+  } catch (e) {
+    _aplicarTema(false);
+  }
+})();
+
 carregarHistoricoStorage();
 renderHist();
 recalc();

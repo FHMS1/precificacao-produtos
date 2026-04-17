@@ -16,12 +16,17 @@
   <!-- Cabeçalho principal com logo e título da ferramenta -->
   <header>
     <div class="hi">
-      <img src="../assets/logo-exito.png" alt="Êxito Contábil">
+      <img src="./exito-logo-branco.png" id="logo-img" alt="Exito Contabil">
       <div class="hi-div"></div>
       <div>
         <h1>Simulador de Precificação</h1>
         <p>Êxito Contábil &nbsp;·&nbsp; Ferramenta de apoio à decisão</p>
       </div>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+        <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
     </div>
   </header>
 

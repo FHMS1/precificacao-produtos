@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/fabiomoura/Desktop/Projeto - Github/precificacao-produtos/precificacao-produtos/**)",
+      "Read(//Users/fabiomoura/Desktop/Projeto - Github/precificacao-produtos/**)"
+    ]
+  }
+}
